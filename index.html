@@ -1,1 +1,266 @@
+<!DOCTYPE html>
+<html lang="ja">
 
+<head>
+  <meta charset="UTF-8">
+  <title>時間割</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      table-layout: fixed;
+      margin-top: 20px;
+    }
+
+    th,
+    td {
+      border: 1px solid #bbbbbb;
+      text-align: center;
+      padding: 0;
+    }
+
+    th {
+      background-color: #ffd6d6;
+    }
+
+    td {
+      height: 100px;
+      vertical-align: top;
+      padding: 2px;
+    }
+
+    a.subject {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 5px;
+      height: 100%;
+      text-decoration: none;
+      background-color: #add8e6;
+      border-radius: 5px;
+      box-sizing: border-box;
+      color: inherit;
+      overflow: hidden;
+    }
+
+    .subject-name {
+      text-align: center;
+      font-size: 0.9em;
+      word-wrap: break-word;
+    }
+
+    .subject:hover {
+      background-color: #d173b9;
+    }
+
+    .room {
+      text-align: right;
+      font-size: 0.8em;
+      color: #333;
+      word-wrap: break-word;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-width: 500px;
+    }
+
+    label {
+      font-weight: bold;
+    }
+
+    .checkbox-group {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .edit-mode {
+      outline: 2px dashed red;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>3秋時間割</h1>
+
+  <table id="timetable">
+    <tr>
+      <th>時限</th>
+      <th>月</th>
+      <th>火</th>
+      <th>水</th>
+      <th>木</th>
+      <th>金</th>
+      <th>土</th>
+    </tr>
+  </table>
+
+  <form id="form">
+    <label>曜日（複数選択可）<span style="color:red;">*</span></label>
+    <div class="checkbox-group" id="days">
+      <label><input type="checkbox" value="mon"> 月</label>
+      <label><input type="checkbox" value="tue"> 火</label>
+      <label><input type="checkbox" value="wed"> 水</label>
+      <label><input type="checkbox" value="thu"> 木</label>
+      <label><input type="checkbox" value="fri"> 金</label>
+      <label><input type="checkbox" value="sut"> 土</label>
+    </div>
+
+    <label>時限（複数選択可）<span style="color:red;">*</span></label>
+    <div class="checkbox-group" id="periods">
+      <label><input type="checkbox" value="1"> 1限</label>
+      <label><input type="checkbox" value="2"> 2限</label>
+      <label><input type="checkbox" value="3"> 3限</label>
+      <label><input type="checkbox" value="4"> 4限</label>
+      <label><input type="checkbox" value="5"> 5限</label>
+    </div>
+
+    <label>授業名<span style="color:red;">*</span></label>
+    <input type="text" id="subject" required>
+
+    <label>教室コード（任意）</label>
+    <input type="text" id="room">
+
+    <label>外部リンクURL（任意）</label>
+    <input type="url" id="url">
+
+    <button type="submit">時間割に追加</button>
+  </form>
+
+  <div style="margin-top: 20px;">
+    <button id="editToggleBtn" onclick="toggleEditMode()">削除モード</button>
+  </div>
+
+  <script>
+    const periods = [
+      { number: 1, time: "09:00～10:40" },
+      { number: 2, time: "10:55～12:35" },
+      { number: 3, time: "13:30～15:10" },
+      { number: 4, time: "15:25～17:05" },
+      { number: 5, time: "17:20～19:00" },
+    ];
+    const days = ["mon", "tue", "wed", "thu", "fri", "sut"];
+    let scheduleData = {};
+    let editMode = false;
+
+    const table = document.getElementById("timetable");
+    periods.forEach(({ number, time }) => {
+      const row = document.createElement("tr");
+      const th = document.createElement("th");
+      th.innerHTML = `${number}限<br><span style='font-size: 0.8em;'>${time}</span>`;
+      row.appendChild(th);
+      days.forEach(day => {
+        const td = document.createElement("td");
+        td.id = `${day}-${number}`;
+        row.appendChild(td);
+      });
+      table.appendChild(row);
+    });
+
+    document.getElementById("form").addEventListener("submit", function (e) {
+      e.preventDefault();
+      const selectedDays = [...document.querySelectorAll("#days input:checked")].map(i => i.value);
+      const selectedPeriods = [...document.querySelectorAll("#periods input:checked")].map(i => i.value);
+      const subject = document.getElementById("subject").value.trim();
+      const room = document.getElementById("room").value.trim();
+      const url = document.getElementById("url").value.trim();
+
+      if (!selectedDays.length || !selectedPeriods.length || subject === "") {
+        alert("曜日・時限・授業名は必須です。");
+        return;
+      }
+
+      selectedDays.forEach(day => {
+        selectedPeriods.forEach(period => {
+          const cellId = `${day}-${period}`;
+          const cell = document.getElementById(cellId);
+          const html = `
+          <a class="subject" href="${url || '#'}" ${url ? 'target="_blank"' : ''}
+            onclick="return handleClick('${cellId}', event)">
+            <div class="subject-name">${subject}</div>
+            <div class="room">${room}</div>
+          </a>`;
+          cell.innerHTML = html;
+          scheduleData[cellId] = { subject, room, url };
+          localStorage.setItem("scheduleData", JSON.stringify(scheduleData));
+        });
+      });
+
+      this.reset();
+    });
+
+    function handleClick(cellId, event) {
+      if (editMode) {
+        if (confirm("この授業を削除しますか？")) {
+          delete scheduleData[cellId];
+          localStorage.setItem("scheduleData", JSON.stringify(scheduleData));
+          const cell = document.getElementById(cellId);
+          if (cell) cell.innerHTML = "";
+        }
+        event.preventDefault();
+        return false;
+      }
+      return true;
+    }
+
+    function toggleEditMode() {
+      editMode = !editMode;
+      const btn = document.getElementById("editToggleBtn");
+      btn.textContent = editMode ? "閲覧モード" : "削除モード";
+      document.querySelectorAll("a.subject").forEach(a => {
+        if (editMode) {
+          a.classList.add("edit-mode");
+        } else {
+          a.classList.remove("edit-mode");
+        }
+      });
+      alert(editMode ? "削除モードになりました。授業をクリックすると削除できます。" : "閲覧モードに戻りました。通常のリンクに戻ります。");
+    }
+
+    function downloadSchedule() {
+      const data = JSON.stringify(scheduleData, null, 2);
+      const blob = new Blob([data], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "my_schedule.json";
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function dayLabel(dayCode) {
+      return { mon: "月", tue: "火", wed: "水", thu: "木", fri: "金", sut: "土" }[dayCode] || dayCode;
+    }
+
+    window.onload = function () {
+      const saved = localStorage.getItem("scheduleData");
+      if (saved) {
+        scheduleData = JSON.parse(saved);
+        for (const [cellId, { subject, room, url }] of Object.entries(scheduleData)) {
+          const cell = document.getElementById(cellId);
+          if (cell) {
+            const html = `
+            <a class="subject" href="${url || '#'}" ${url ? 'target="_blank"' : ''}
+              onclick="return handleClick('${cellId}', event)">
+              <div class="subject-name">${subject}</div>
+              <div class="room">${room}</div>
+            </a>`;
+            cell.innerHTML = html;
+          }
+        }
+      }
+    }
+  </script>
+
+</body>
+
+</html>
