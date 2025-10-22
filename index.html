@@ -2,265 +2,391 @@
 <html lang="ja">
 
 <head>
-  <meta charset="UTF-8">
-  <title>時間割</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      padding: 20px;
-    }
+    <meta charset="UTF-8">
+    <title>時間割</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+            background-color: #f4f7f6;
+        }
 
-    table {
-      border-collapse: collapse;
-      width: 100%;
-      table-layout: fixed;
-      margin-top: 20px;
-    }
+        h1 {
+            color: #333;
+            border-bottom: 2px solid #ffd6d6;
+            padding-bottom: 5px;
+        }
 
-    th,
-    td {
-      border: 1px solid #bbbbbb;
-      text-align: center;
-      padding: 0;
-    }
+        /* --- 時間割テーブルのスタイル --- */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            table-layout: fixed;
+            margin-top: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            background-color: #ffffff;
+        }
 
-    th {
-      background-color: #ffd6d6;
-    }
+        th,
+        td {
+            border: 1px solid #999999;
+            /* 線の色を濃く */
+            text-align: center;
+            padding: 0;
+        }
 
-    td {
-      height: 100px;
-      vertical-align: top;
-      padding: 2px;
-    }
+        th {
+            background-color: #ffd6d6;
+            font-weight: bold;
+            color: #333;
+            padding: 5px 0;
+        }
 
-    a.subject {
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      padding: 5px;
-      height: 100%;
-      text-decoration: none;
-      background-color: #add8e6;
-      border-radius: 5px;
-      box-sizing: border-box;
-      color: inherit;
-      overflow: hidden;
-    }
+        td {
+            height: 100px;
+            vertical-align: top;
+            padding: 2px;
+            background-color: #ffffff;
+            /* 授業がないセルのデフォルト背景 */
+        }
 
-    .subject-name {
-      text-align: center;
-      font-size: 0.9em;
-      word-wrap: break-word;
-    }
+        /* ゼブラストライプ (縞模様) */
+        #timetable tr:nth-child(even) td {
+            background-color: #f7f7f7;
+        }
 
-    .subject:hover {
-      background-color: #d173b9;
-    }
+        /* --- 授業セル (a.subject) のスタイル --- */
+        a.subject {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 5px;
+            height: 100%;
+            text-decoration: none;
+            background-color: #add8e6;
+            border-radius: 8px;
+            /* 角を丸く */
+            box-sizing: border-box;
+            color: inherit;
+            overflow: hidden;
+            box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+            /* 影を追加 */
+            transition: background-color 0.3s, transform 0.1s;
+            /* アニメーション */
+        }
 
-    .room {
-      text-align: right;
-      font-size: 0.8em;
-      color: #333;
-      word-wrap: break-word;
-    }
+        .subject-name {
+            text-align: center;
+            font-size: 1.0em;
+            /* 少し大きく */
+            font-weight: bold;
+            /* 太字に */
+            word-wrap: break-word;
+        }
 
-    form {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      max-width: 500px;
-    }
+        .subject:hover {
+            background-color: #79c5e3;
+            /* ホバー時の色 */
+            transform: translateY(-2px);
+            /* 少し浮き上がるアニメーション */
+        }
 
-    label {
-      font-weight: bold;
-    }
+        .room {
+            text-align: right;
+            font-size: 0.9em;
+            /* 少し大きく */
+            color: #555;
+            word-wrap: break-word;
+        }
 
-    .checkbox-group {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
+        /* --- フォームのスタイル --- */
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-width: 600px;
+            margin: 30px 0;
+            border: 1px solid #ccc;
+            padding: 20px;
+            border-radius: 10px;
+            background-color: #ffffff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
 
-    .edit-mode {
-      outline: 2px dashed red;
-    }
-  </style>
+        label {
+            font-weight: bold;
+            color: #444;
+            margin-top: 5px;
+        }
+
+        input[type="text"],
+        input[type="url"] {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1.0em;
+            box-sizing: border-box;
+            width: 100%;
+        }
+
+        .checkbox-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            padding: 5px 0;
+        }
+
+        .checkbox-group label {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: normal;
+            cursor: pointer;
+        }
+
+        button[type="submit"] {
+            padding: 12px 20px;
+            background-color: #5cb85c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-top: 10px;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #4cae4c;
+        }
+
+        /* --- 削除モードボタンのスタイル --- */
+        #button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        #editToggleBtn {
+            padding: 8px 15px;
+            background-color: #f0ad4e;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.0em;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        #editToggleBtn:hover {
+            background-color: #ec971f;
+        }
+
+        #button-group button:last-child {
+            background-color: #007bff;
+            /* JSON保存ボタンの色 */
+        }
+
+        #button-group button:last-child:hover {
+            background-color: #0056b3;
+        }
+
+        /* --- 編集モードの視覚的強調 --- */
+        .edit-mode {
+            outline: 3px dashed red;
+            /* 破線を太く */
+            background-color: #ff9999 !important;
+            /* 背景を赤系にして危険度を強調 */
+            cursor: pointer;
+        }
+
+        .edit-mode:hover {
+            background-color: #ff5555 !important;
+            transform: scale(1.02);
+        }
+    </style>
 </head>
 
 <body>
 
-  <h1>2025年秋時間割</h1>
-  <a href="https://moodle.cc.sophia.ac.jp/calendar/view.php?view=month" target="_blank">課題カレンダー</a>
+    <h1>2025年秋時間割</h1>
+    <a href="https://moodle.cc.sophia.ac.jp/calendar/view.php?view=month" target="_blank">課題カレンダー</a>
 
-  <table id="timetable">
-    <tr>
-      <th>時限</th>
-      <th>月</th>
-      <th>火</th>
-      <th>水</th>
-      <th>木</th>
-      <th>金</th>
-      <th>土</th>
-    </tr>
-  </table>
+    <table id="timetable">
+        <tr>
+            <th>時限</th>
+            <th>月</th>
+            <th>火</th>
+            <th>水</th>
+            <th>木</th>
+            <th>金</th>
+            <th>土</th>
+        </tr>
+    </table>
 
-  <form id="form">
-    <label>曜日（複数選択可）<span style="color:red;">*</span></label>
-    <div class="checkbox-group" id="days">
-      <label><input type="checkbox" value="mon"> 月</label>
-      <label><input type="checkbox" value="tue"> 火</label>
-      <label><input type="checkbox" value="wed"> 水</label>
-      <label><input type="checkbox" value="thu"> 木</label>
-      <label><input type="checkbox" value="fri"> 金</label>
-      <label><input type="checkbox" value="sut"> 土</label>
+    <form id="form">
+        <h2>授業の追加・登録</h2>
+        <label>曜日（複数選択可）<span style="color:red;">*</span></label>
+        <div class="checkbox-group" id="days">
+            <label><input type="checkbox" value="mon"> 月</label>
+            <label><input type="checkbox" value="tue"> 火</label>
+            <label><input type="checkbox" value="wed"> 水</label>
+            <label><input type="checkbox" value="thu"> 木</label>
+            <label><input type="checkbox" value="fri"> 金</label>
+            <label><input type="checkbox" value="sut"> 土</label>
+        </div>
+
+        <label>時限（複数選択可）<span style="color:red;">*</span></label>
+        <div class="checkbox-group" id="periods">
+            <label><input type="checkbox" value="1"> 1限</label>
+            <label><input type="checkbox" value="2"> 2限</label>
+            <label><input type="checkbox" value="3"> 3限</label>
+            <label><input type="checkbox" value="4"> 4限</label>
+            <label><input type="checkbox" value="5"> 5限</label>
+        </div>
+
+        <label>授業名<span style="color:red;">*</span></label>
+        <input type="text" id="subject" required placeholder="例：情報科学概論">
+
+        <label>教室コード（任意）</label>
+        <input type="text" id="room" placeholder="例：2-501、オンデマンドなど">
+
+        <label>外部リンクURL（任意）</label>
+        <input type="url" id="url" placeholder="例：https://moodle.cc.sophia.ac.jp/course/view.php?id=12345">
+
+        <button type="submit">時間割に追加</button>
+    </form>
+
+    <div id="button-group">
+        <button id="editToggleBtn" onclick="toggleEditMode()">削除モード</button>
+        <button onclick="downloadSchedule()">スケジュールを保存 (JSON)</button>
     </div>
 
-    <label>時限（複数選択可）<span style="color:red;">*</span></label>
-    <div class="checkbox-group" id="periods">
-      <label><input type="checkbox" value="1"> 1限</label>
-      <label><input type="checkbox" value="2"> 2限</label>
-      <label><input type="checkbox" value="3"> 3限</label>
-      <label><input type="checkbox" value="4"> 4限</label>
-      <label><input type="checkbox" value="5"> 5限</label>
-    </div>
+    <script>
+        const periods = [
+            { number: 1, time: "09:00～10:40" },
+            { number: 2, time: "10:55～12:35" },
+            { number: 3, time: "13:30～15:10" },
+            { number: 4, time: "15:25～17:05" },
+            { number: 5, time: "17:20～19:00" },
+        ];
+        const days = ["mon", "tue", "wed", "thu", "fri", "sut"];
+        let scheduleData = {};
+        let editMode = false;
 
-    <label>授業名<span style="color:red;">*</span></label>
-    <input type="text" id="subject" required>
+        const table = document.getElementById("timetable");
 
-    <label>教室コード（任意）</label>
-    <input type="text" id="room">
-
-    <label>外部リンクURL（任意）</label>
-    <input type="url" id="url">
-
-    <button type="submit">時間割に追加</button>
-  </form>
-
-  <div style="margin-top: 20px;">
-    <button id="editToggleBtn" onclick="toggleEditMode()">削除モード</button>
-  </div>
-
-  <script>
-    const periods = [
-      { number: 1, time: "09:00～10:40" },
-      { number: 2, time: "10:55～12:35" },
-      { number: 3, time: "13:30～15:10" },
-      { number: 4, time: "15:25～17:05" },
-      { number: 5, time: "17:20～19:00" },
-    ];
-    const days = ["mon", "tue", "wed", "thu", "fri", "sut"];
-    let scheduleData = {};
-    let editMode = false;
-
-    const table = document.getElementById("timetable");
-    periods.forEach(({ number, time }) => {
-      const row = document.createElement("tr");
-      const th = document.createElement("th");
-      th.innerHTML = `${number}限<br><span style='font-size: 0.8em;'>${time}</span>`;
-      row.appendChild(th);
-      days.forEach(day => {
-        const td = document.createElement("td");
-        td.id = `${day}-${number}`;
-        row.appendChild(td);
-      });
-      table.appendChild(row);
-    });
-
-    document.getElementById("form").addEventListener("submit", function (e) {
-      e.preventDefault();
-      const selectedDays = [...document.querySelectorAll("#days input:checked")].map(i => i.value);
-      const selectedPeriods = [...document.querySelectorAll("#periods input:checked")].map(i => i.value);
-      const subject = document.getElementById("subject").value.trim();
-      const room = document.getElementById("room").value.trim();
-      const url = document.getElementById("url").value.trim();
-
-      if (!selectedDays.length || !selectedPeriods.length || subject === "") {
-        alert("曜日・時限・授業名は必須です。");
-        return;
-      }
-
-      selectedDays.forEach(day => {
-        selectedPeriods.forEach(period => {
-          const cellId = `${day}-${period}`;
-          const cell = document.getElementById(cellId);
-          const html = `
-          <a class="subject" href="${url || '#'}" ${url ? 'target="_blank"' : ''}
-            onclick="return handleClick('${cellId}', event)">
-            <div class="subject-name">${subject}</div>
-            <div class="room">${room}</div>
-          </a>`;
-          cell.innerHTML = html;
-          scheduleData[cellId] = { subject, room, url };
-          localStorage.setItem("scheduleData", JSON.stringify(scheduleData));
+        // 時間割の行とセルを生成
+        periods.forEach(({ number, time }) => {
+            const row = document.createElement("tr");
+            const th = document.createElement("th");
+            th.innerHTML = `${number}限<br><span style='font-size: 0.8em;'>${time}</span>`;
+            row.appendChild(th);
+            days.forEach(day => {
+                const td = document.createElement("td");
+                td.id = `${day}-${number}`;
+                row.appendChild(td);
+            });
+            table.appendChild(row);
         });
-      });
 
-      this.reset();
-    });
+        // 授業追加フォームの処理
+        document.getElementById("form").addEventListener("submit", function (e) {
+            e.preventDefault();
+            const selectedDays = [...document.querySelectorAll("#days input:checked")].map(i => i.value);
+            const selectedPeriods = [...document.querySelectorAll("#periods input:checked")].map(i => i.value);
+            const subject = document.getElementById("subject").value.trim();
+            const room = document.getElementById("room").value.trim();
+            const url = document.getElementById("url").value.trim();
 
-    function handleClick(cellId, event) {
-      if (editMode) {
-        if (confirm("この授業を削除しますか？")) {
-          delete scheduleData[cellId];
-          localStorage.setItem("scheduleData", JSON.stringify(scheduleData));
-          const cell = document.getElementById(cellId);
-          if (cell) cell.innerHTML = "";
+            if (!selectedDays.length || !selectedPeriods.length || subject === "") {
+                alert("曜日・時限・授業名は必須です。");
+                return;
+            }
+
+            selectedDays.forEach(day => {
+                selectedPeriods.forEach(period => {
+                    const cellId = `${day}-${period}`;
+                    const cell = document.getElementById(cellId);
+                    // HTML要素を生成する関数
+                    const subjectHTML = createSubjectHTML(cellId, subject, room, url);
+                    cell.innerHTML = subjectHTML;
+                    scheduleData[cellId] = { subject, room, url };
+                });
+            });
+
+            // データの保存とフォームのリセット
+            localStorage.setItem("scheduleData", JSON.stringify(scheduleData));
+            this.reset();
+        });
+
+        // 授業セルのHTMLを生成するヘルパー関数
+        function createSubjectHTML(cellId, subject, room, url) {
+            return `
+        <a class="subject ${editMode ? 'edit-mode' : ''}" href="${url || '#'}" ${url ? 'target="_blank"' : ''}
+          onclick="return handleClick('${cellId}', event)">
+          <div class="subject-name">${subject}</div>
+          <div class="room">${room}</div>
+        </a>`;
         }
-        event.preventDefault();
-        return false;
-      }
-      return true;
-    }
 
-    function toggleEditMode() {
-      editMode = !editMode;
-      const btn = document.getElementById("editToggleBtn");
-      btn.textContent = editMode ? "閲覧モード" : "削除モード";
-      document.querySelectorAll("a.subject").forEach(a => {
-        if (editMode) {
-          a.classList.add("edit-mode");
-        } else {
-          a.classList.remove("edit-mode");
+        // 授業セルクリック時の処理
+        function handleClick(cellId, event) {
+            if (editMode) {
+                if (confirm("この授業を削除しますか？")) {
+                    delete scheduleData[cellId];
+                    localStorage.setItem("scheduleData", JSON.stringify(scheduleData));
+                    const cell = document.getElementById(cellId);
+                    if (cell) cell.innerHTML = "";
+                }
+                event.preventDefault();
+                return false; // リンク遷移をキャンセル
+            }
+            return true; // 通常のリンク遷移を許可
         }
-      });
-      alert(editMode ? "削除モードになりました。授業をクリックすると削除できます。" : "閲覧モードに戻りました。通常のリンクに戻ります。");
-    }
 
-    function downloadSchedule() {
-      const data = JSON.stringify(scheduleData, null, 2);
-      const blob = new Blob([data], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "my_schedule.json";
-      a.click();
-      URL.revokeObjectURL(url);
-    }
+        // 編集モードの切り替え
+        function toggleEditMode() {
+            editMode = !editMode;
+            const btn = document.getElementById("editToggleBtn");
+            btn.textContent = editMode ? "閲覧モード" : "削除モード";
 
-    function dayLabel(dayCode) {
-      return { mon: "月", tue: "火", wed: "水", thu: "木", fri: "金", sut: "土" }[dayCode] || dayCode;
-    }
-
-    window.onload = function () {
-      const saved = localStorage.getItem("scheduleData");
-      if (saved) {
-        scheduleData = JSON.parse(saved);
-        for (const [cellId, { subject, room, url }] of Object.entries(scheduleData)) {
-          const cell = document.getElementById(cellId);
-          if (cell) {
-            const html = `
-            <a class="subject" href="${url || '#'}" ${url ? 'target="_blank"' : ''}
-              onclick="return handleClick('${cellId}', event)">
-              <div class="subject-name">${subject}</div>
-              <div class="room">${room}</div>
-            </a>`;
-            cell.innerHTML = html;
-          }
+            document.querySelectorAll("a.subject").forEach(a => {
+                if (editMode) {
+                    a.classList.add("edit-mode");
+                } else {
+                    a.classList.remove("edit-mode");
+                }
+            });
+            alert(editMode ? "削除モードになりました。授業をクリックすると削除できます。" : "閲覧モードに戻りました。通常のリンクに戻ります。");
         }
-      }
-    }
-  </script>
+
+        // スケジュールのダウンロード
+        function downloadSchedule() {
+            const data = JSON.stringify(scheduleData, null, 2);
+            const blob = new Blob([data], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "my_schedule.json";
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // ページロード時のデータ復元
+        window.onload = function () {
+            const saved = localStorage.getItem("scheduleData");
+            if (saved) {
+                scheduleData = JSON.parse(saved);
+                for (const [cellId, { subject, room, url }] of Object.entries(scheduleData)) {
+                    const cell = document.getElementById(cellId);
+                    if (cell) {
+                        cell.innerHTML = createSubjectHTML(cellId, subject, room, url);
+                    }
+                }
+            }
+        }
+    </script>
 
 </body>
 
