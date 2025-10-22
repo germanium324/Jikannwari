@@ -361,17 +361,6 @@
             alert(editMode ? "削除モードになりました。授業をクリックすると削除できます。" : "閲覧モードに戻りました。通常のリンクに戻ります。");
         }
 
-        // スケジュールのダウンロード
-        function downloadSchedule() {
-            const data = JSON.stringify(scheduleData, null, 2);
-            const blob = new Blob([data], { type: "application/json" });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = "my_schedule.json";
-            a.click();
-            URL.revokeObjectURL(url);
-        }
 
         // ページロード時のデータ復元
         window.onload = function () {
